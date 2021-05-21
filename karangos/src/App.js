@@ -32,7 +32,7 @@ import FooterBar from './ui/FooterBar'
 import Box from '@material-ui/core/Box'
 import { makeStyles } from '@material-ui/core/styles'
 import { BrowserRouter, Route, Switch } from 'react-router-dom'
-import KarangosList from './routed/KarangosList'
+import KarangosList from './routed/KarangosList2'
 import KarangosForm from './routed/KarangosForm'
 
 const theme = createMuiTheme({
