@@ -150,10 +150,10 @@ export default function KarangosList() {
       align: 'right', 
       headerAlign: 'right', 
       flex: true,
-      valueGetter: params => (
+      valueFormatter: params => (
         Number(params.value).toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })
       ),
-      sortable: false
+      sortComparator: (v1, v2) => Number(v1) > Number(v2) ? 1 : -1
     },
     { 
       field: 'editar',

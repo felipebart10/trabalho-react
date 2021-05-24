@@ -47,7 +47,15 @@ export default function KarangosForm() {
   for(let i = (new Date()).getFullYear(); i >= 1900; i--) years.push(i)
 
   // Expressão regular definindo a máscara de entrada para a placa
-  const placaMask = /[A-Z]{3}-[0-9][0-9A-J][0-9]{2}/
+  //const placaMask = /[A-Z]{3}-[0-9][0-9A-J][0-9]{2}/
+
+  const formatChars = {
+    'A': '[A-Za-z]',
+    '0': '[0-9]',
+    '$': '[0-9A-Ja-j]'
+  }
+  
+  const placaMask = 'AAA-0$00'
 
   const [karango, setKarango] = useState({
     id: null,
@@ -72,6 +80,9 @@ export default function KarangosForm() {
       if(newState) setKarango({...karango, importado: '1'})
       else setKarango({...karango, importado: '0'})
       setImportadoChecked(newState) 
+    }
+    else if(property === 'placa') {
+      setKarango({...karango, placa: event.target.value.toUpperCase()})
     }
     else {
       // Quando o nome de uma propriedade de objeto aparece entre [],
@@ -151,9 +162,10 @@ export default function KarangosForm() {
 
         <InputMask
           id="placa" 
+          formatChars={formatChars}
           mask={placaMask}
           value={karango.placa}
-          onChange={handleInputChange}
+          onChange={(event) => handleInputChange(event, 'placa')}
         >
           {() => <TextField 
             label="Placa" 
