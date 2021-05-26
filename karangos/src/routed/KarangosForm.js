@@ -6,6 +6,13 @@ import FormControlLabel from '@material-ui/core/FormControlLabel'
 import Checkbox from '@material-ui/core/Checkbox'
 import InputMask from 'react-input-mask'
 import { makeStyles } from '@material-ui/core/styles'
+import InputAdornment from '@material-ui/core/InputAdornment'
+import Toolbar from '@material-ui/core/Toolbar'
+import Button from '@material-ui/core/Button'
+import axios from 'axios'
+import { useHistory } from 'react-router-dom'
+import Snackbar from '@material-ui/core/Snackbar'
+import MuiAlert from '@material-ui/lab/Alert'
 
 const useStyles = makeStyles(theme => ({
   form: {
@@ -19,6 +26,12 @@ const useStyles = makeStyles(theme => ({
       maxWidth: '500px',
       margin: '0 24px 24px 0'
     }
+  },
+  toolbar: {
+    display: 'flex',
+    width: '100%',
+    justifyContent: 'space-around',
+    marginTop: '36px'
   }
 }))
 
@@ -46,16 +59,21 @@ export default function KarangosForm() {
   const years = []
   for(let i = (new Date()).getFullYear(); i >= 1900; i--) years.push(i)
 
-  // Expressão regular definindo a máscara de entrada para a placa
-  //const placaMask = /[A-Z]{3}-[0-9][0-9A-J][0-9]{2}/
-
+  // Classes de caracters para a máscara da placa
+  // 1) Três primeiras posições, somente letras (maiúsculas ou minúsculas) ~> [A-Za-z]
+  // 2) Quinta, sétima e oitava posições, somente dígitos ~> [0-9]
+  // 3) Sexta posição: dígitos ou letras (maiúsculas ou minúsculas) de A a J ~> [0-9A-Ja-j]
   const formatChars = {
     'A': '[A-Za-z]',
     '0': '[0-9]',
-    '$': '[0-9A-Ja-j]'
+    '#': '[0-9A-Ja-j]'
   }
-  
-  const placaMask = 'AAA-0$00'
+
+  // Máscara de entrada para a placa
+  const placaMask = 'AAA-0#00'
+
+  // Máscara para CPF: '000.000.000-00'
+  // Máscara para CNPJ: '00.000.000/0000-00'
 
   const [karango, setKarango] = useState({
     id: null,
@@ -70,6 +88,19 @@ export default function KarangosForm() {
   const [currentId, setCurrentId] = useState()
 
   const [importadoChecked, setImportadoChecked] = useState(false)
+
+  const [sendBtnStatus, setSendBtnStatus] = useState({
+    disabled: false,
+    label: 'Enviar'
+  })
+
+  const [sbStatus, setSbStatus] = useState({
+    open: false,
+    severity: 'success',
+    message: '' 
+  })
+
+  const history = useHistory()
 
   function handleInputChange(event, property) {
     setCurrentId(event.target.id)
@@ -92,10 +123,50 @@ export default function KarangosForm() {
     }
   }
 
+  async function saveData() {
+    try {
+      // Desabilita o botão de enviar para evitar envios duplicados
+      setSendBtnStatus({disabled: true, label: 'Enviando...'})
+      
+      await axios.post('https://api.faustocintra.com.br/karangos', karango)
+      
+      // Mostra a SnackBar
+      setSbStatus({open: true, severity: 'success', message: 'Dados salvos com sucesso!'})
+      
+    }
+    catch(error) {
+      // Mostra a SnackBar
+      setSbStatus({open: true, severity: 'error', message: 'ERRO: ' + error.message})
+    }
+    // Restaura o estado inicial do botão de envio
+    setSendBtnStatus({disabled: false, label: 'Enviar'})
+  }
+
+  function handleSubmit(event) {
+
+    event.preventDefault()    // Evita que a página seja recarregada
+
+    saveData()
+
+  }
+
+  function handleSbClose() {
+    setSbStatus({...sbStatus, open: false})
+
+    // Retorna para a página de listagem em caso de sucesso
+    if(sbStatus.severity === 'success') history.push('/list')
+  }
+
   return (
     <>
+      <Snackbar open={sbStatus.open} autoHideDuration={6000} onClose={handleSbClose}>
+        <MuiAlert elevation={6} variant="filled" onClose={handleSbClose} severity={sbStatus.severity}>
+          {sbStatus.message}
+        </MuiAlert>
+      </Snackbar>
+
       <h1>Cadastrar novo karango</h1>
-      <form className={classes.form}>
+      <form className={classes.form} onSubmit={handleSubmit}>
         
         <TextField 
           id="marca" 
@@ -153,7 +224,6 @@ export default function KarangosForm() {
               id="importado"
               checked={importadoChecked}
               onChange={handleInputChange}
-              color="primary"
             />
           }
           label="Importado?"
@@ -162,8 +232,8 @@ export default function KarangosForm() {
 
         <InputMask
           id="placa" 
-          formatChars={formatChars}
           mask={placaMask}
+          formatChars={formatChars}
           value={karango.placa}
           onChange={(event) => handleInputChange(event, 'placa')}
         >
@@ -175,6 +245,29 @@ export default function KarangosForm() {
             fullWidth
           />}
         </InputMask>
+
+        <TextField 
+          id="preco" 
+          label="Preço" 
+          variant="filled"
+          value={karango.preco}
+          onChange={handleInputChange}
+          required  /* not null, precisa ser preenchido */
+          placeholder="Informe o valor do veículo"
+          fullWidth
+          type="number"
+          onFocus={event => event.target.select()}  // Seleciona o conteúdo ao focar
+          InputProps={{
+            startAdornment: <InputAdornment position="start">R$</InputAdornment>,
+          }}
+        />
+
+        <Toolbar className={classes.toolbar}>
+          <Button type="submit" variant="contained" color="secondary" disabled={sendBtnStatus.disabled}>
+            {sendBtnStatus.label}
+          </Button>
+          <Button variant="contained">Voltar</Button>
+        </Toolbar>
 
         <div>
           {JSON.stringify(karango)}
