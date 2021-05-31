@@ -13,6 +13,7 @@ import axios from 'axios'
 import { useHistory } from 'react-router-dom'
 import Snackbar from '@material-ui/core/Snackbar'
 import MuiAlert from '@material-ui/lab/Alert'
+import React from 'react'
 
 const useStyles = makeStyles(theme => ({
   form: {
@@ -100,6 +101,17 @@ export default function KarangosForm() {
     message: '' 
   })
 
+  const [error, setError] = useState({
+    marca: '',
+    modelo: '',
+    placa: '',
+    preco: ''
+  })
+
+  const [isValid, setIsValid] = useState(false)
+
+  const [isModified, setIsModified] = useState(false)
+
   const history = useHistory()
 
   function handleInputChange(event, property) {
@@ -121,6 +133,45 @@ export default function KarangosForm() {
       // variável ou expressão contida dentro dos colchetes
       setKarango({...karango, [property]: event.target.value})
     }
+    setIsModified(true)   // O formulário foi modificado
+    validate()  // Dispara a validação
+  }
+
+  function validate() {
+    let valid = true
+
+    const newErrors = {
+      marca: '',
+      modelo: '',
+      placa: '',
+      preco: ''
+    }
+
+    // trim(): retira espaços em branco do início e do final de uma string
+    if(karango.marca.trim() === '') {
+      newErrors.marca = 'A marca deve ser preenchida'
+      valid = false
+    }     
+
+    if(karango.modelo.trim() === '') {
+      newErrors.modelo = 'O modelo deve ser preenchido'
+      valid = false
+    }
+
+    // A placa não pode ser string vazia nem conter sublinhado
+    if(karango.placa.trim() === '' || karango.placa.includes('_')) {
+      newErrors.placa = 'A placa deve ser preenchida corretamente'
+      valid = false
+    }
+
+    // O preço deve ser numérico e maior que zero
+    if(isNaN(karango.preco) || Number(karango.preco) <= 0) {
+      newErrors.preco = 'O preço deve ser informado e maior que zero'
+      valid = false
+    }
+
+    setError(newErrors)
+    setIsValid(valid)
   }
 
   async function saveData() {
@@ -177,6 +228,8 @@ export default function KarangosForm() {
           required  /* not null, precisa ser preenchido */
           placeholder="Informe a marca do veículo"
           fullWidth
+          error={error.marca !== ''}
+          helperText={error.marca}
         />
 
         <TextField 
@@ -188,6 +241,8 @@ export default function KarangosForm() {
           required  /* not null, precisa ser preenchido */
           placeholder="Informe o modelo do veículo"
           fullWidth
+          error={error.modelo !== ''}
+          helperText={error.modelo}
         />
 
         <TextField 
@@ -243,6 +298,8 @@ export default function KarangosForm() {
             required  /* not null, precisa ser preenchido */
             placeholder="Informe a placa do veículo"
             fullWidth
+            error={error.placa !== ''}
+            helperText={error.placa}
           />}
         </InputMask>
 
@@ -260,6 +317,8 @@ export default function KarangosForm() {
           InputProps={{
             startAdornment: <InputAdornment position="start">R$</InputAdornment>,
           }}
+          error={error.preco !== ''}
+          helperText={error.preco}
         />
 
         <Toolbar className={classes.toolbar}>
@@ -273,6 +332,10 @@ export default function KarangosForm() {
           {JSON.stringify(karango)}
           <br />
           currentId: {JSON.stringify(currentId)}
+          <br />
+          isValid: {JSON.stringify(isValid)}
+          <br />
+          isModified: {JSON.stringify(isModified)}
         </div>
       </form>
     </>
