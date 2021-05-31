@@ -104,6 +104,7 @@ export default function KarangosForm() {
   const [error, setError] = useState({
     marca: '',
     modelo: '',
+    cor: '',
     placa: '',
     preco: ''
   })
@@ -115,63 +116,74 @@ export default function KarangosForm() {
   const history = useHistory()
 
   function handleInputChange(event, property) {
+
+    const newKarango = {...karango}
+
     setCurrentId(event.target.id)
     if(event.target.id) property = event.target.id
 
     if(property === 'importado') {
       const newState = ! importadoChecked // Inverte o valor
-      if(newState) setKarango({...karango, importado: '1'})
-      else setKarango({...karango, importado: '0'})
+      if(newState) newKarango.importado = '1'
+      else newKarango.importado = '0'
       setImportadoChecked(newState) 
     }
     else if(property === 'placa') {
-      setKarango({...karango, placa: event.target.value.toUpperCase()})
+      newKarango.placa = event.target.value.toUpperCase()
     }
     else {
       // Quando o nome de uma propriedade de objeto aparece entre [],
       // significa que o nome da propriedade será determinado pela
       // variável ou expressão contida dentro dos colchetes
-      setKarango({...karango, [property]: event.target.value})
+      newKarango[property] = event.target.value
     }
+    setKarango(newKarango)
+    validate(newKarango)  // Dispara a validação
     setIsModified(true)   // O formulário foi modificado
-    validate()  // Dispara a validação
   }
 
-  function validate() {
+  function validate(info) {
     let valid = true
 
-    const newErrors = {
+    const newError = {
       marca: '',
       modelo: '',
+      cor: '',
       placa: '',
       preco: ''
     }
 
     // trim(): retira espaços em branco do início e do final de uma string
-    if(karango.marca.trim() === '') {
-      newErrors.marca = 'A marca deve ser preenchida'
+    if(info.marca.trim() === '') {
+      newError.marca = 'A marca deve ser preenchida'
       valid = false
     }     
 
-    if(karango.modelo.trim() === '') {
-      newErrors.modelo = 'O modelo deve ser preenchido'
+    if(info.modelo.trim() === '') {
+      newError.modelo = 'O modelo deve ser preenchido'
+      valid = false
+    }
+
+    if(info.cor.trim() === '') {
+      newError.cor = 'A cor deve ser informada'
       valid = false
     }
 
     // A placa não pode ser string vazia nem conter sublinhado
-    if(karango.placa.trim() === '' || karango.placa.includes('_')) {
-      newErrors.placa = 'A placa deve ser preenchida corretamente'
+    if(info.placa.trim() === '' || info.placa.includes('_')) {
+      newError.placa = 'A placa deve ser preenchida corretamente'
       valid = false
     }
 
     // O preço deve ser numérico e maior que zero
-    if(isNaN(karango.preco) || Number(karango.preco) <= 0) {
-      newErrors.preco = 'O preço deve ser informado e maior que zero'
+    if(isNaN(info.preco) || Number(info.preco) <= 0) {
+      newError.preco = 'O preço deve ser informado e maior que zero'
       valid = false
     }
 
-    setError(newErrors)
+    setError(newError)
     setIsValid(valid)
+    return valid
   }
 
   async function saveData() {
@@ -255,6 +267,8 @@ export default function KarangosForm() {
           placeholder="Informe a cor do veículo"
           select
           fullWidth
+          error={error.cor !== ''}
+          helperText={error.cor}
         >
           { colors.map(color => <MenuItem value={color}>{color}</MenuItem>)}
         </TextField>
