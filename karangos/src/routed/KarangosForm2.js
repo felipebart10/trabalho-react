@@ -10,11 +10,10 @@ import InputAdornment from '@material-ui/core/InputAdornment'
 import Toolbar from '@material-ui/core/Toolbar'
 import Button from '@material-ui/core/Button'
 import axios from 'axios'
-import { useHistory, useParams } from 'react-router-dom'
+import { useHistory } from 'react-router-dom'
 import Snackbar from '@material-ui/core/Snackbar'
 import MuiAlert from '@material-ui/lab/Alert'
 import React from 'react'
-import ConfirmDialog from '../ui/ConfirmDialog'
 
 const useStyles = makeStyles(theme => ({
   form: {
@@ -40,27 +39,6 @@ const useStyles = makeStyles(theme => ({
 export default function KarangosForm() {
   const classes = useStyles()
 
-  const colors = [
-    'Amarelo',
-    'Azul',
-    'Bege',
-    'Branco',
-    'Cinza',
-    'Dourado',
-    'Laranja',
-    'Marrom',
-    'Prata',
-    'Preto',
-    'Rosa',
-    'Roxo',
-    'Verde',
-    'Vermelho',
-    'Vinho'
-  ]
-
-  const years = []
-  for(let i = (new Date()).getFullYear(); i >= 1900; i--) years.push(i)
-
   // Classes de caracters para a máscara da placa
   // 1) Três primeiras posições, somente letras (maiúsculas ou minúsculas) ~> [A-Za-z]
   // 2) Quinta, sétima e oitava posições, somente dígitos ~> [0-9]
@@ -73,13 +51,11 @@ export default function KarangosForm() {
 
   // Máscara de entrada para a placa
   const placaMask = 'AAA-0#00'
+
   // Máscara para CPF: '000.000.000-00'
   const cpfMask = '000.000.000-00'
   // Máscara para RG: '00.000.000-#'
   const rgMask = '00.000.000-#'
-
-  // Máscara para CPF: '000.000.000-00'
-  // Máscara para CNPJ: '00.000.000/0000-00'
 
   const [karango, setKarango] = useState({
     id: null,
@@ -122,25 +98,22 @@ export default function KarangosForm() {
     email: ''
   })
 
+  //const [isValid, setIsValid] = useState(false)
+
   const [isModified, setIsModified] = useState(false)
-
-  const [dialogOpen, setDialogOpen] = useState(false) // O diálogo de confirmação está aberto?
-
-  const [title, setTitle] = useState('Cadastrar novo cliente')
 
   const history = useHistory()
   const params = useParams()
-
   // useEffect() para quando o formulário for carregado (só na inicialização)
   useEffect(() => {
     // Verificamos se a rota atual contém o parâmetro id
     // Em caso positivo, buscamos os dados no back-end e carregamos o formulário para edição
     if(params.id) {
-      setTitle('Editar cliente')
+      setTitle('Editar karango')
       getData(params.id)
     }
   }, [])
-
+  
   async function getData(id) {
     try {
       let response = await axios.get(`https://api.faustocintra.com.br/clientes/${id}`)
@@ -157,35 +130,26 @@ export default function KarangosForm() {
 
   function handleInputChange(event, property) {
 
-    const karangoTemp = {...karango}
+    const newKarango = {...karango}
 
     setCurrentId(event.target.id)
     if(event.target.id) property = event.target.id
 
-    /*if(property === 'importado') {
-      const newState = ! importadoChecked // Inverte o valor
-      if(newState) karangoTemp.importado = '1'
-      else karangoTemp.importado = '0'
-      setImportadoChecked(newState) 
-    }
-    else if(property === 'placa') {
-      karangoTemp.placa = event.target.value.toUpperCase()
-    }*/
     else {
       // Quando o nome de uma propriedade de objeto aparece entre [],
       // significa que o nome da propriedade será determinado pela
       // variável ou expressão contida dentro dos colchetes
-      karangoTemp[property] = event.target.value
+      newKarango[property] = event.target.value
     }
-    setKarango(karangoTemp)
+    setKarango(newKarango)
+    validate(newKarango)  // Dispara a validação
     setIsModified(true)   // O formulário foi modificado
-    validate(karangoTemp)  // Dispara a validação
   }
 
-  function validate(data) {
-    let isValid = true
+  function validate(info) {
+    let valid = true
 
-    const errorTemp = {
+    const newError = {
       nome: '',
       cpf: '',
       rg: '',
@@ -200,57 +164,58 @@ export default function KarangosForm() {
     }
 
     // trim(): retira espaços em branco do início e do final de uma string
-    if(data.nome.trim() === '') {
+    if(info.nome.trim() === '') {
       errorTemp.nome = 'O nome deve ser preenchido'
       isValid = false
-    }   
+    }     
 
-    if(data.cpf.trim() === '') {
+    if(info.cpf.trim() === '') {
       errorTemp.cpf = 'O CPF deve ser preenchido'
       isValid = false
     }
 
-    if(data.rg.trim() === '') {
+    if(info.rg.trim() === '') {
       errorTemp.rg = 'O RG deve ser informada'
       isValid = false
     }
 
     // A placa não pode ser string vazia nem conter sublinhado
-    if(data.logradouro.trim() === '') {
+    if(info.logradouro.trim() === '') {
       errorTemp.logradouro = 'O endereço deve ser preenchido'
       isValid = false
     }
 
     // O preço deve ser numérico e maior que zero
-    if(isNaN(data.num_imovel)) {
+    if(isNaN(info.num_imovel)) {
       errorTemp.num_imovel = 'O número do imóvel deve ser preenchido'
       isValid = false
     }
 
-    if(data.bairro.trim() === '') {
+    if(info.bairro.trim() === '') {
       errorTemp.bairro = 'O bairro deve ser preenchido'
       isValid = false
     }
 
-    if(data.municipio.trim() === '') {
+    if(info.municipio.trim() === '') {
       errorTemp.municipio = 'O município deve ser preenchido'
       isValid = false
     }
-    if(data.uf.trim() === '') {
+    if(info.uf.trim() === '') {
       errorTemp.uf = 'O estado deve ser preenchido'
       isValid = false
     }
-    if(data.telefone.trim() === '') {
+    if(info.telefone.trim() === '') {
       errorTemp.telefone = 'O telefone deve ser preenchido'
       isValid = false
     }
-    if(data.email.trim() === '') {
+    if(info.email.trim() === '') {
       errorTemp.email = 'O e-mail deve ser preenchido'
       isValid = false
     }
 
-    setError(errorTemp)
-    return isValid
+    setError(newError)
+    setIsValid(valid)
+    return valid
   }
 
   async function saveData() {
@@ -258,10 +223,7 @@ export default function KarangosForm() {
       // Desabilita o botão de enviar para evitar envios duplicados
       setSendBtnStatus({disabled: true, label: 'Enviando...'})
       
-      // Se estivermos editando, precisamos enviar os dados com o verbo HTTP PUT
-      if(params.id) await axios.put(`https://api.faustocintra.com.br/clientes/${params.id}`, karango)
-      // Senão, estaremos criando um novo registro, e o verbo HTTP a ser usado é o POST
-      else await axios.post('https://api.faustocintra.com.br/clientes', karango)
+      await axios.post('https://api.faustocintra.com.br/clientes', karango)
       
       // Mostra a SnackBar
       setSbStatus({open: true, severity: 'success', message: 'Dados salvos com sucesso!'})
@@ -279,8 +241,7 @@ export default function KarangosForm() {
 
     event.preventDefault()    // Evita que a página seja recarregada
 
-    // Só envia para o banco de dados se o formulário for válido
-    if(validate(karango)) saveData()
+    saveData()
 
   }
 
@@ -291,27 +252,8 @@ export default function KarangosForm() {
     if(sbStatus.severity === 'success') history.push('/list')
   }
 
-  function handleDialogClose(result) {
-    setDialogOpen(false)
-
-    // Se o usuário concordou em voltar 
-    if(result) history.push('/list')
-  }
-
-  function handleGoBack() {
-    // Se o formulário tiver sido modificado, exibimos o diálogo de confirmação
-    if(isModified) setDialogOpen(true)
-    // Senão, podemos voltar diretamente para a listagem
-    else history.push('/list')
-  }
-
   return (
     <>
-
-      <ConfirmDialog isOpen={dialogOpen} onClose={handleDialogClose}>
-        Há dados não salvos. Deseja realmente voltar?
-      </ConfirmDialog>
-
       <Snackbar open={sbStatus.open} autoHideDuration={6000} onClose={handleSbClose}>
         <MuiAlert elevation={6} variant="filled" onClose={handleSbClose} severity={sbStatus.severity}>
           {sbStatus.message}
@@ -320,22 +262,8 @@ export default function KarangosForm() {
 
       <h1>{title}</h1>
       <form className={classes.form} onSubmit={handleSubmit}>
-      
         
         <TextField 
-          id="marca" 
-          label="Marca" 
-          variant="filled"
-          value={karango.marca}
-          onChange={handleInputChange}
-          required  /* not null, precisa ser preenchido */
-          placeholder="Informe a marca do veículo"
-          fullWidth
-          error={error.marca !== ''}
-          helperText={error.marca}
-        />
-
-<TextField 
           id="nome" 
           label="Nome" 
           variant="filled"
@@ -477,13 +405,15 @@ export default function KarangosForm() {
           <Button type="submit" variant="contained" color="secondary" disabled={sendBtnStatus.disabled}>
             {sendBtnStatus.label}
           </Button>
-          <Button variant="contained" onClick={handleGoBack}>Voltar</Button>
+          <Button variant="contained">Voltar</Button>
         </Toolbar>
 
         <div>
           {JSON.stringify(karango)}
           <br />
           currentId: {JSON.stringify(currentId)}
+          <br />
+          isValid: {JSON.stringify(isValid)}
           <br />
           isModified: {JSON.stringify(isModified)}
         </div>

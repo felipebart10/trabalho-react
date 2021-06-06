@@ -55,7 +55,7 @@ export default function KarangosList() {
 
   async function getData() {
     try { // tenta buscar os dados
-      let response = await axios.get('https://api.faustocintra.com.br/karangos?by=marca,modelo')
+      let response = await axios.get('https://api.faustocintra.com.br/clientes?by=id')
       if(response.data.length > 0) setKarangos(response.data)
     }
     catch(error) {
@@ -65,7 +65,7 @@ export default function KarangosList() {
 
   async function deleteItem() {
     try {
-      await axios.delete(`https://api.faustocintra.com.br/karangos/${deletable}`)
+      await axios.delete(`https://api.faustocintra.com.br/clientes/${deletable}`)
       getData()     // Atualiza os dados da tabela
       setSbSeverity('success')
       setSbMessage('Exclusão efetuada com sucesso.')
@@ -103,57 +103,78 @@ export default function KarangosList() {
       sortComparator: (v1, v2) => Number(v1) > Number(v2) ? 1 : -1
     },
     { 
-      field: 'marca', 
-      headerName: 'Marca',
+      field: 'nome', 
+      headerName: 'Nome',
       flex: true 
     },
     { 
-      field: 'modelo', 
-      headerName: 'Modelo',
+      field: 'cpf', 
+      headerName: 'CPF',
       flex: true 
     },
     { 
-      field: 'cor', 
-      headerName: 'Cor',
+      field: 'rg', 
+      headerName: 'RG',
       align: 'center',
       headerAlign: 'center', 
       flex: true 
     },
     { 
-      field: 'ano_fabricacao', 
-      headerName: 'Ano',
+      field: 'logradouro', 
+      headerName: 'Logradouro',
       align: 'center',
       headerAlign: 'center', 
       flex: true,
       sortComparator: (v1, v2) => Number(v1) > Number(v2) ? 1 : -1 
     },
     { 
-      field: 'importado', 
-      headerName: 'Importado?',
+      field: 'num_imovel', 
+      headerName: 'Nº',
       align: 'center', 
       headerAlign: 'center', 
       flex: true,
-      renderCell: params => (
-        <Checkbox checked={params.value === "1"} readOnly />
-      )
     },
     { 
-      field: 'placa', 
-      headerName: 'Placa',
+      field: 'complemento', 
+      headerName: 'Complemento',
       align: 'center', 
       headerAlign: 'center', 
       flex: true 
     },
     { 
-      field: 'preco', 
-      headerName: 'Preço',
-      align: 'right', 
-      headerAlign: 'right', 
-      flex: true,
-      valueFormatter: params => (
-        Number(params.value).toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })
-      ),
-      sortComparator: (v1, v2) => Number(v1) > Number(v2) ? 1 : -1
+      field: 'bairro', 
+      headerName: 'Bairro',
+      align: 'center', 
+      headerAlign: 'center', 
+      flex: true 
+    },
+    { 
+      field: 'municipio', 
+      headerName: 'Município',
+      align: 'center', 
+      headerAlign: 'center', 
+      flex: true 
+    },
+    { 
+      field: 'uf', 
+      headerName: 'UF',
+      align: 'center', 
+      headerAlign: 'center', 
+      flex: true 
+    },
+    { 
+      field: 'telefone', 
+      headerName: 'Telefone',
+      align: 'center', 
+      headerAlign: 'center', 
+      flex: true 
+    },
+    { 
+      field: 'email', 
+      headerName: 'e-mail',
+      align: 'center', 
+      headerAlign: 'center', 
+      flex: true 
     },
     { 
       field: 'editar',
@@ -162,7 +183,7 @@ export default function KarangosList() {
       headerAlign: 'center', 
       flex: true,
       renderCell: params => (
-        <IconButton aria-label="editar">
+        <IconButton aria-label="editar" onClick={() => history.push(`/edit/${params.id}`)}>
           <EditIcon />
         </IconButton>
       )
