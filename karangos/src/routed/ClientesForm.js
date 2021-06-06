@@ -40,27 +40,6 @@ const useStyles = makeStyles(theme => ({
 export default function KarangosForm() {
   const classes = useStyles()
 
-  const colors = [
-    'Amarelo',
-    'Azul',
-    'Bege',
-    'Branco',
-    'Cinza',
-    'Dourado',
-    'Laranja',
-    'Marrom',
-    'Prata',
-    'Preto',
-    'Rosa',
-    'Roxo',
-    'Verde',
-    'Vermelho',
-    'Vinho'
-  ]
-
-  const years = []
-  for(let i = (new Date()).getFullYear(); i >= 1900; i--) years.push(i)
-
   // Classes de caracters para a máscara da placa
   // 1) Três primeiras posições, somente letras (maiúsculas ou minúsculas) ~> [A-Za-z]
   // 2) Quinta, sétima e oitava posições, somente dígitos ~> [0-9]
@@ -162,28 +141,15 @@ export default function KarangosForm() {
     setCurrentId(event.target.id)
     if(event.target.id) property = event.target.id
 
-    /*if(property === 'importado') {
-      const newState = ! importadoChecked // Inverte o valor
-      if(newState) karangoTemp.importado = '1'
-      else karangoTemp.importado = '0'
-      setImportadoChecked(newState) 
-    }
-    else if(property === 'placa') {
-      karangoTemp.placa = event.target.value.toUpperCase()
-    }*/
-    else {
-      // Quando o nome de uma propriedade de objeto aparece entre [],
-      // significa que o nome da propriedade será determinado pela
-      // variável ou expressão contida dentro dos colchetes
-      karangoTemp[property] = event.target.value
-    }
+    karangoTemp[property] = event.target.value
+
     setKarango(karangoTemp)
     setIsModified(true)   // O formulário foi modificado
     validate(karangoTemp)  // Dispara a validação
   }
 
   function validate(data) {
-    let isValid = true
+    
 
     const errorTemp = {
       nome: '',
@@ -198,6 +164,7 @@ export default function KarangosForm() {
       telefone: '',
       email: ''
     }
+    let isValid = true
 
     // trim(): retira espaços em branco do início e do final de uma string
     if(data.nome.trim() === '') {
@@ -320,20 +287,6 @@ export default function KarangosForm() {
 
       <h1>{title}</h1>
       <form className={classes.form} onSubmit={handleSubmit}>
-      
-        
-        <TextField 
-          id="marca" 
-          label="Marca" 
-          variant="filled"
-          value={karango.marca}
-          onChange={handleInputChange}
-          required  /* not null, precisa ser preenchido */
-          placeholder="Informe a marca do veículo"
-          fullWidth
-          error={error.marca !== ''}
-          helperText={error.marca}
-        />
 
 <TextField 
           id="nome" 
@@ -479,14 +432,6 @@ export default function KarangosForm() {
           </Button>
           <Button variant="contained" onClick={handleGoBack}>Voltar</Button>
         </Toolbar>
-
-        <div>
-          {JSON.stringify(karango)}
-          <br />
-          currentId: {JSON.stringify(currentId)}
-          <br />
-          isModified: {JSON.stringify(isModified)}
-        </div>
       </form>
     </>
   )

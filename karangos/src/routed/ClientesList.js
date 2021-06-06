@@ -205,7 +205,7 @@ export default function KarangosList() {
   return (
     <>
       <ConfirmDialog isOpen={dialogOpen} onClose={handleDialogClose}>
-        Deseja realmente excluir este karango?
+        Deseja realmente excluir este cliente?
       </ConfirmDialog>
       
       <Snackbar open={sbOpen} autoHideDuration={6000} onClose={handleSbClose}>
@@ -214,11 +214,11 @@ export default function KarangosList() {
         </MuiAlert>
       </Snackbar>
       
-      <h1>Listagem de Karangos</h1>
+      <h1>Listagem de clientes</h1>
       <Toolbar className={classes.toolbar}>
         <Button color="secondary" variant="contained" size="large" 
           startIcon={<AddBoxIcon />} onClick={() => history.push('/new')}>
-          Novo Karango
+          Novo Cliente
         </Button>
       </Toolbar>
       <Paper elevation={4}>

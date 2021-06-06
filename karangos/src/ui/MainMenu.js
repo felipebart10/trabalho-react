@@ -43,11 +43,11 @@ export default function MainMenu() {
         onClose={handleClose}
       >
         <MenuItem onClick={handleClose}>
-          <Link to="/list" className={classes.menuLink}>Listar karangos</Link>
+          <Link to="/list" className={classes.menuLink}>Listar clientes</Link>
         </MenuItem>
         
         <MenuItem onClick={handleClose}>
-          <Link to="/new" className={classes.menuLink}>Cadastrar novo karango</Link>
+          <Link to="/new" className={classes.menuLink}>Cadastrar novo cliente</Link>
         </MenuItem>
         
       </Menu>
